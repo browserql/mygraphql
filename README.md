@@ -18,7 +18,7 @@ Create your first model in the directory `schema/models`:
 type Log {
   id: INT!
   message: VARCHAR!
-  date: TIMESTAMP!
+  date: TIMESTAMP! @INDEX
 }
 ```
 
