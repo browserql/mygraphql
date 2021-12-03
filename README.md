@@ -34,7 +34,7 @@ Write your first queries:
 import Log from "../__mygraphql/models/Log";
 
 async function insertLog(message, date) {
-  return Log.insert({ message, data });
+  return Log.insert({ message, date });
 }
 
 async function viewTodaysFirst30Logs() {
@@ -46,3 +46,39 @@ async function viewTodaysFirst30Logs() {
 ```
 
 That's it!
+
+## Quick examples
+
+Find below some SQL queries translated in models:
+
+```sql
+INSERT INTO foo (a, b, c) VALUES (1, 2, 3), (4, 5, 6)
+```
+
+```javascript
+Foo.insert({ a: 1, b: 2, c: 3 }, { a: 4, b: 5, c: 6 });
+```
+
+```sql
+UPDATE foo
+SET a = 1
+WHERE a = 0
+AND (b < 2 OR C >= 3)
+LIMIT 10
+```
+
+```javascript
+Foo.update(
+  { a: 1 },
+  (foo) => [
+    foo.has.a.which.equals(0),
+    [
+      [
+        foo.has.b.which.is.lesser.than(2),
+        foo.has.c.which.is.greater.or.equal.to(3),
+      ],
+    ],
+  ],
+  (query) => [query.limit(10)]
+);
+```
