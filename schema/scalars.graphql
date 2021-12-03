@@ -1,0 +1,11 @@
+scalar INT
+
+scalar VARCHAR
+
+scalar LONGTEXT
+
+scalar TIMESTAMP
+
+scalar BOOLEAN
+
+scalar NULL
