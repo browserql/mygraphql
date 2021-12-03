@@ -82,3 +82,23 @@ Foo.update(
   (query) => [query.limit(10)]
 );
 ```
+
+```sql
+SELECT cars.brand, wheels.brand
+FROM cars
+LEFT OUTER JOIN wheels on cars.wheels = wheels.id
+WHERE cars.extreme IS NOT NULL
+ORDER BY cars.brand ASC, wheels.brand DESC
+LIMIT 10
+```
+
+```javascript
+Car.find(
+  (car) => [car.has.extreme.which.is.not(null)],
+  (query) => [
+    query.left.outer.join(Wheel),
+    query.orderBy(query.asc(Car.fields.brand), query.desc(Wheel.fields.brand)),
+    query.limit(10)
+  ]
+);
+```
