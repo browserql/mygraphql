@@ -31,6 +31,7 @@ mygraphql gen
 Write your first queries:
 
 ```javascript
+import { where, orderBy, limit } from "@browserql/mygraphql";
 import Log from "../__mygraphql/models/Log";
 
 async function insertLog(message, date) {
@@ -39,8 +40,9 @@ async function insertLog(message, date) {
 
 async function viewTodaysFirst30Logs() {
   return Log.find(
-    (log) => [log.has.date.which.is.today()],
-    (query, log) => [query.orderBy(query.desc(log.date)), query.limit(30)]
+    where(Log.has.date.which.is.today()),
+    orderBy(Log.desc.date()),
+    limit(30)
   );
 }
 ```
@@ -61,25 +63,24 @@ Foo.insert({ a: 1, b: 2, c: 3 }, { a: 4, b: 5, c: 6 });
 
 ```sql
 UPDATE foo
-SET a = 1
+SET a = 1, b = b + 2
 WHERE a = 0
 AND (b < 2 OR C >= 3)
-LIMIT 10
+LIMIT 10,10
 ```
 
 ```javascript
 Foo.update(
-  { a: 1 },
-  (foo) => [
-    foo.has.a.which.equals(0),
-    [
-      [
-        foo.has.b.which.is.lesser.than(2),
-        foo.has.c.which.is.greater.or.equal.to(3),
-      ],
-    ],
-  ],
-  (query) => [query.limit(10)]
+  set(Foo.set.a(1), Foo.increment.b(2)),
+  where(
+    Foo.has.a.which.equals(0),
+    or(
+      Foo.has.b.which.is.lesser.than(2),
+      Foo.has.c.which.is.greater.or.equal.to(3)
+    )
+  ),
+  limit(10),
+  skip(10)
 );
 ```
 
@@ -88,17 +89,19 @@ SELECT cars.brand, wheels.brand
 FROM cars
 LEFT OUTER JOIN wheels on cars.wheels = wheels.id
 WHERE cars.extreme IS NOT NULL
+AND wheels.ratings >= 4.5
 ORDER BY cars.brand ASC, wheels.brand DESC
 LIMIT 10
 ```
 
 ```javascript
 Car.find(
-  (car) => [car.has.extreme.which.is.not(null)],
-  (query) => [
-    query.left.outer.join(Wheel),
-    query.orderBy(query.asc(Car.fields.brand), query.desc(Wheel.fields.brand)),
-    query.limit(10)
-  ]
+  where(
+    Car.has.extreme.which.is.not(null),
+    Wheel.has.ratings.which.is.at.least(4.5)
+  ),
+  join.left.outer(Wheel),
+  orderBy(Car.asc.brand(), Wheel.desc.brand()),
+  limit(10)
 );
 ```
