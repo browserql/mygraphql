@@ -1,0 +1,29 @@
+type Question @TABLE {
+  id: INT! @PRIMARY_KEY @AUTO_INCREMENT
+  title: TEXT!
+  answer: CHAR!
+}
+
+type Option @TABLE {
+  id: INT! @PRIMARY_KEY @AUTO_INCREMENT
+  title: TEXT!
+  letter: CHAR!
+  question: INT! @FOREIGN_KEY(REFERENCES: "Question")
+}
+
+type Result @TABLE {
+  id: INT! @PRIMARY_KEY @AUTO_INCREMENT
+  question: INT! @FOREIGN_KEY(REFERENCES: "Question")
+  tested: INT! @DEFAULT(INT: 0) @INDEX
+  passed: INT! @DEFAULT(INT: 0) @INDEX
+}
+
+type Query {
+  getRandomQuestion: Question!
+  getWorstQuestion: Question!
+  getQuestions: [Question!]!
+}
+
+type Mutation {
+  submitAnswer(question: Question!, letter: CHAR!): Boolean
+}

@@ -15,7 +15,7 @@ npx create @browserql/mygraphql my-project
 Create your first model in the directory `schema/models`:
 
 ```graphql
-type Log {
+type Log @model {
   id: INT!
   message: VARCHAR!
   date: TIMESTAMP! @INDEX
@@ -30,78 +30,80 @@ mygraphql gen
 
 Write your first queries:
 
-```javascript
-import { where, orderBy, limit } from "@browserql/mygraphql";
-import Log from "../__mygraphql/models/Log";
-
-async function insertLog(message, date) {
-  return Log.insert({ message, date });
+```graphql
+type Question @TABLE {
+  id: INT! @PRIMARY_KEY @AUTO_INCREMENT
+  title: TEXT!
+  answer: CHAR!
 }
 
-async function viewTodaysFirst30Logs() {
-  return Log.find(
-    where(Log.has.date.which.is.today()),
-    orderBy(Log.desc.date()),
-    limit(30)
-  );
+type Option @TABLE {
+  id: INT! @PRIMARY_KEY @AUTO_INCREMENT
+  title: TEXT!
+  letter: CHAR!
+  question: INT! @FOREIGN_KEY(REFERENCES: "Question")
 }
-```
 
-That's it!
+type Result @TABLE {
+  id: INT! @PRIMARY_KEY @AUTO_INCREMENT
+  question: INT! @FOREIGN_KEY(REFERENCES: "Question")
+  tested: INT! @DEFAULT(INT: 0) @INDEX
+  passed: INT! @DEFAULT(INT: 0) @INDEX
+}
 
-## Quick examples
+type Query {
+  getRandomQuestion: Question!
+  getWorstQuestion: Question!
+  getQuestions: [Question!]!
+}
 
-Find below some SQL queries translated in models:
+type Mutation {
+  submitAnswer(question: Question! letter: CHAR!)
+}
 
-```sql
-INSERT INTO foo (a, b, c) VALUES (1, 2, 3), (4, 5, 6)
-```
 
-```javascript
-Foo.insert({ a: 1, b: 2, c: 3 }, { a: 4, b: 5, c: 6 });
-```
 
-```sql
-UPDATE foo
-SET a = 1, b = b + 2
-WHERE a = 0
-AND (b < 2 OR C >= 3)
-LIMIT 10,10
-```
 
-```javascript
-Foo.update(
-  set(Foo.set.a(1), Foo.increment.b(2)),
-  where(
-    Foo.has.a.which.equals(0),
-    or(
-      Foo.has.b.which.is.lesser.than(2),
-      Foo.has.c.which.is.greater.or.equal.to(3)
-    )
-  ),
-  limit(10),
-  skip(10)
-);
-```
+query {
+  SELECT_FROM_Result(
+    WHERE: [
+      {
+        Result_passed: { isLesserThan: { column: Result_tested } } 
+      }
+    ]
+    ORDER_BY: [ { Result_passed: ASC }]
+    LIMIT: 1
+  ) {
 
-```sql
-SELECT cars.brand, wheels.brand
-FROM cars
-LEFT OUTER JOIN wheels on cars.wheels = wheels.id
-WHERE cars.extreme IS NOT NULL
-AND wheels.ratings >= 4.5
-ORDER BY cars.brand ASC, wheels.brand DESC
-LIMIT 10
-```
+  }
 
-```javascript
-Car.find(
-  where(
-    Car.has.extreme.which.is.not(null),
-    Wheel.has.ratings.which.is.at.least(4.5)
-  ),
-  join.left.outer(Wheel),
-  orderBy(Car.asc.brand(), Wheel.desc.brand()),
-  limit(10)
-);
+  SELECT_FROM_Patient(
+    WHERE: [{ doctor: { equals: $doctorId } }]
+    LIMIT: $limit
+    OFFSET: $offset
+    ORDER_BY: [{ created: ASC }]
+  ) {
+    ...FullPatientFragment
+  }
+}
+
+mutation {
+  UPDATE_Patient(
+    SET: [{ firstName: { to: $firstName } }]
+    WHERE: [{ id: { equals: $patientId } }]
+  ) {
+    ...PatientFragment
+  }
+
+  INSERT_INTO_Patient(values: [
+    {
+      isRegistered: false
+      email: "nn@nn.com"
+    }
+  ]) {
+    ... on User {
+      ...UserFragment
+    }
+  }
+}
 ```

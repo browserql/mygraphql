@@ -1,11 +1,1 @@
-directive @MAX(length: PositiveInt!) on FIELD_DEFINITION
-
-directive @PRIMARY_KEY on FIELD_DEFINITION
-
-directive @AUTO_INCREMENT on FIELD_DEFINITION
-
-directive @BELONGS_TO(
-  ONE: String
-  MANY: String
-  ON: String
-) on FIELD_DEFINITION
+directive @TABLE(NAME: String) on OBJECT

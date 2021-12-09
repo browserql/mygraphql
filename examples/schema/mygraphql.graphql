@@ -1,0 +1,3 @@
+type Settings @mygraphqlSettings {
+  namingStrategies: [lowerCase pluralize]
+}
